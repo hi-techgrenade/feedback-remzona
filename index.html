@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>РемЗОНА — Оцените нашу работу</title>
+
+<style>
+
+body{
+font-family:Arial, sans-serif;
+background:#f4f6fb;
+margin:0;
+padding:30px;
+display:flex;
+justify-content:center;
+}
+
+.container{
+max-width:520px;
+width:100%;
+background:white;
+padding:25px;
+border-radius:16px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+text-align:center;
+}
+
+.logo{
+width:220px;
+margin-bottom:20px;
+}
+
+h1{
+margin-bottom:10px;
+color:#17479e;
+}
+
+p{
+color:#555;
+}
+
+.btn{
+display:block;
+width:100%;
+margin:10px 0;
+padding:14px;
+border:none;
+border-radius:10px;
+font-size:16px;
+cursor:pointer;
+background:#17479e;
+color:white;
+text-decoration:none;
+}
+
+.btn:hover{
+background:#0f3477;
+}
+
+.btn-red{
+background:#e3222a;
+}
+
+.btn-red:hover{
+background:#b91c21;
+}
+
+textarea,input{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:8px;
+border:1px solid #ddd;
+font-size:15px;
+}
+
+textarea{
+min-height:120px;
+resize:vertical;
+}
+
+.hidden{
+display:none;
+}
+
+.success{
+color:green;
+margin-top:10px;
+}
+
+.error{
+color:red;
+margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container" id="step1">
+
+<img src="logo.jpg" class="logo">
+
+<h1>Вам понравился ремонт?</h1>
+
+<p>Нам важна ваша обратная связь</p>
+
+<button class="btn" onclick="showGood()">Да, всё понравилось</button>
+
+<button class="btn btn-red" onclick="showBad()">Есть замечания</button>
+
+</div>
+
+
+
+<div class="container hidden" id="good">
+
+<img src="logo.jpg" class="logo">
+
+<h1>Спасибо за оценку</h1>
+
+<p>Будем благодарны за отзыв</p>
+
+<a class="btn"
+href="https://yandex.ru/maps/org/remzona/181772428362/reviews/"
+target="_blank"
+onclick="track('Яндекс')">
+Оставить отзыв в Яндекс Картах
+</a>
+
+<a class="btn"
+href="https://2gis.ru/taganrog/firm/70000001022500563/tab/reviews"
+target="_blank"
+onclick="track('2ГИС')">
+Оставить отзыв в 2ГИС
+</a>
+
+<a class="btn"
+href="https://www.google.com/maps/search/?api=1&query=RemZona%20Таганрог"
+target="_blank"
+onclick="track('Google')">
+Открыть Google Maps
+</a>
+
+<button class="btn btn-red" onclick="goStart()">Назад</button>
+
+</div>
+
+
+
+<div class="container hidden" id="bad">
+
+<img src="logo.jpg" class="logo">
+
+<h1>Расскажите, что исправить</h1>
+
+<p>Мы внимательно рассмотрим обращение</p>
+
+<form id="feedbackForm">
+
+<input name="name" placeholder="Ваше имя">
+
+<input name="phone" placeholder="Телефон">
+
+<textarea name="message" placeholder="Что нам исправить?" required></textarea>
+
+<!-- honeypot -->
+<input name="company" style="display:none">
+
+<button type="submit" class="btn btn-red">
+Отправить
+</button>
+
+</form>
+
+<div id="status"></div>
+
+<button class="btn" onclick="goStart()">Назад</button>
+
+</div>
+
+
+
+<div class="container hidden" id="success">
+
+<img src="logo.jpg" class="logo">
+
+<h1>Спасибо!</h1>
+
+<p>Ваше сообщение отправлено</p>
+
+<button class="btn" onclick="goStart()">На главную</button>
+
+</div>
+
+
+
+<script>
+
+const step1=document.getElementById("step1")
+const good=document.getElementById("good")
+const bad=document.getElementById("bad")
+const success=document.getElementById("success")
+
+function hideAll(){
+step1.classList.add("hidden")
+good.classList.add("hidden")
+bad.classList.add("hidden")
+success.classList.add("hidden")
+}
+
+function goStart(){
+hideAll()
+step1.classList.remove("hidden")
+}
+
+function showGood(){
+hideAll()
+good.classList.remove("hidden")
+}
+
+function showBad(){
+hideAll()
+bad.classList.remove("hidden")
+}
+
+async function track(platform){
+
+try{
+
+await fetch("/track",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+platform:platform
+})
+})
+
+}catch(e){
+console.log(e)
+}
+
+}
+
+const form=document.getElementById("feedbackForm")
+const status=document.getElementById("status")
+
+form.addEventListener("submit",async function(e){
+
+e.preventDefault()
+
+const data=new FormData(form)
+
+const payload={
+name:data.get("name"),
+phone:data.get("phone"),
+message:data.get("message"),
+company:data.get("company")
+}
+
+try{
+
+const res=await fetch("/feedback",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(payload)
+
+})
+
+const json=await res.json()
+
+if(json.ok){
+
+hideAll()
+success.classList.remove("hidden")
+
+}else{
+
+status.innerHTML='<div class="error">Не удалось отправить сообщение</div>'
+
+}
+
+}catch(e){
+
+status.innerHTML='<div class="error">Ошибка соединения</div>'
+
+}
+
+})
+
+</script>
+
+</body>
+</html>
