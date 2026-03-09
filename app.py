@@ -1,18 +1,39 @@
 from datetime import datetime
+from urllib.parse import quote_plus
 import time
+import re
 
 import requests
 from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
-BOT_TOKEN = ""
-CHAT_ID = ""
+BOT_TOKEN = "8512904617:AAEG2wyXs5bMGAQ-bJ9t1fa-ZLoPwGzS6ow"
+CHAT_ID = "7493805659"
 
 MAX_MESSAGE_LENGTH = 1500
 
 last_message = None
 last_time = 0
+
+
+def is_mobile_request(user_agent: str) -> bool:
+    if not user_agent:
+        return False
+
+    ua = user_agent.lower()
+    mobile_markers = (
+        "android",
+        "iphone",
+        "ipad",
+        "ipod",
+        "mobile",
+        "windows phone",
+        "opera mini",
+        "blackberry",
+    )
+
+    return any(marker in ua for marker in mobile_markers)
 
 
 def send_telegram(text: str):
@@ -31,6 +52,36 @@ def send_telegram(text: str):
 
 @app.route("/")
 def index():
+    if not is_mobile_request(request.headers.get("User-Agent", "")):
+        qr_data = quote_plus(request.url)
+        qr_src = f"https://api.qrserver.com/v1/create-qr-code/?size=320x320&data={qr_data}"
+        return (
+            (
+                "<!doctype html>"
+                "<html lang='ru'><head><meta charset='utf-8'>"
+                "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+                "<title>Откройте с телефона</title>"
+                "<style>"
+                "body{margin:0;min-height:100vh;display:grid;place-items:center;"
+                "font-family:Arial,sans-serif;background:#f2f6ff;color:#102048;padding:20px}"
+                ".card{max-width:420px;width:100%;background:#fff;border-radius:20px;padding:24px;"
+                "text-align:center;box-shadow:0 20px 40px rgba(16,32,72,.12)}"
+                ".logo{width:220px;max-width:90%;margin:0 auto 14px;display:block}"
+                "h1{margin:0 0 8px;font-size:28px}.muted{margin:0 0 16px;color:#5b6785}"
+                ".qr{width:220px;height:220px;max-width:100%;border-radius:12px;"
+                "border:1px solid #dbe6ff}.small{margin-top:12px;color:#6e7892;font-size:14px}"
+                "</style></head><body><div class='card'>"
+                "<img class='logo' src='/logo.jpg' alt='РемЗОНА'>"
+                "<h1>Зайдите с телефона</h1>"
+                "<p class='muted'>Наведите камеру на QR-код и откройте страницу на смартфоне.</p>"
+                f"<img class='qr' src='{qr_src}' alt='QR-код для открытия сайта'>"
+                "<div class='small'>Если QR не сканируется, попробуйте открыть эту ссылку в браузере телефона вручную.</div>"
+                "</div></body></html>"
+            ),
+            200,
+            {"Content-Type": "text/html; charset=utf-8"},
+        )
+
     return send_from_directory(".", "index.html")
 
 
@@ -70,6 +121,14 @@ def feedback():
     # блок ссылок
     if "http://" in message or "https://" in message:
         return jsonify({"ok": False})
+
+    # проверка телефона
+    if phone:
+        if not re.fullmatch(r"[0-9+()\-\s]{7,20}", phone):
+            return jsonify({"ok": False})
+        digits_only = re.sub(r"\D", "", phone)
+        if len(digits_only) < 10:
+            return jsonify({"ok": False})
 
     # защита от спама одинаковыми сообщениями
     if message == last_message:
@@ -117,5 +176,4 @@ def track():
 
 
 if __name__ == "__main__":
-
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)

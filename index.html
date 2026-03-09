@@ -3,301 +3,544 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>РемЗОНА — Оцените нашу работу</title>
-
+<title>РемЗОНА - Оцените нашу работу</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Rubik+Mono+One&display=swap" rel="stylesheet">
 <style>
-
-body{
-font-family:Arial, sans-serif;
-background:#f4f6fb;
-margin:0;
-padding:30px;
-display:flex;
-justify-content:center;
+:root{
+--blue:#00389f;
+--blue-deep:#001b52;
+--red:#e31b34;
+--red-deep:#aa1025;
+--paper:#f6f9ff;
+--ink:#0f1b38;
+--line:rgba(255,255,255,.38);
+--soft:rgba(255,255,255,.72);
 }
 
-.container{
-max-width:520px;
-width:100%;
-background:white;
-padding:25px;
-border-radius:16px;
-box-shadow:0 10px 30px rgba(0,0,0,0.08);
-text-align:center;
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:"Manrope",sans-serif;
+min-height:100svh;
+color:var(--ink);
+overflow-x:hidden;
+display:grid;
+place-items:center;
+padding:20px;
+background:
+radial-gradient(1200px 600px at 10% 100%,rgba(227,27,52,.18),transparent 62%),
+radial-gradient(1000px 600px at 90% 0%,rgba(0,56,159,.24),transparent 60%),
+conic-gradient(from 220deg at 55% 30%,#e8f0ff,#d8e6ff,#eaf1ff,#d8e6ff,#e8f0ff);
+}
+
+.canvas{
+position:fixed;
+inset:0;
+pointer-events:none;
+overflow:hidden;
+}
+
+.ribbon,
+.orb,
+.grid{
+position:absolute;
+}
+
+.grid{
+inset:-10%;
+background-image:
+linear-gradient(rgba(0,56,159,.07) 1px,transparent 1px),
+linear-gradient(90deg,rgba(0,56,159,.07) 1px,transparent 1px);
+background-size:46px 46px;
+transform:perspective(700px) rotateX(56deg) translateY(35%);
+opacity:.36;
+}
+
+.ribbon{
+width:120vw;
+height:190px;
+left:-10vw;
+border-radius:50% 50% 0 0;
+filter:blur(.2px);
+}
+
+.ribbon.top{
+top:-65px;
+background:linear-gradient(100deg,var(--blue),#0051d8,var(--red));
+clip-path:polygon(0 62%,14% 52%,36% 67%,53% 58%,71% 66%,88% 54%,100% 63%,100% 100%,0 100%);
+opacity:.95;
+animation:driftTop 15s ease-in-out infinite;
+}
+
+.ribbon.bottom{
+bottom:-90px;
+background:linear-gradient(100deg,#0a48ba,#0742ab,var(--red));
+clip-path:polygon(0 40%,15% 48%,30% 37%,50% 49%,66% 34%,82% 45%,100% 36%,100% 0,0 0);
+opacity:.85;
+animation:driftBottom 13s ease-in-out infinite;
+}
+
+.orb{
+border-radius:50%;
+filter:blur(1px);
+}
+
+.orb.blue{
+right:-120px;
+top:16%;
+width:360px;
+height:360px;
+background:radial-gradient(circle at 35% 35%,rgba(0,86,255,.5),rgba(0,86,255,0));
+animation:pulse 8s ease-in-out infinite;
+}
+
+.orb.red{
+left:-130px;
+bottom:6%;
+width:320px;
+height:320px;
+background:radial-gradient(circle at 50% 50%,rgba(227,27,52,.42),rgba(227,27,52,0));
+animation:pulse 9.5s ease-in-out infinite reverse;
+}
+
+@keyframes driftTop{
+0%,100%{transform:translateX(0) translateY(0)}
+50%{transform:translateX(-2%) translateY(7px)}
+}
+
+@keyframes driftBottom{
+0%,100%{transform:translateX(0) translateY(0)}
+50%{transform:translateX(2%) translateY(-8px)}
+}
+
+@keyframes pulse{
+0%,100%{transform:scale(1)}
+50%{transform:scale(1.08)}
+}
+
+.stage{
+position:relative;
+z-index:2;
+width:min(980px,100%);
+}
+
+.shell{
+position:relative;
+background:
+linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,255,255,.82)),
+linear-gradient(90deg,rgba(0,56,159,.08),rgba(227,27,52,.08));
+border:1px solid var(--line);
+border-radius:34px;
+backdrop-filter:blur(10px);
+box-shadow:0 24px 70px rgba(7,25,77,.22),0 2px 10px rgba(7,25,77,.08);
+overflow:hidden;
+}
+
+.shell::before{
+content:"";
+position:absolute;
+inset:0;
+pointer-events:none;
+background:none;
+}
+
+.layout{
+position:relative;
+z-index:1;
+display:grid;
+grid-template-columns:1fr 1.15fr;
+min-height:630px;
+}
+
+.hero{
+position:relative;
+padding:36px 28px 32px;
+border-right:1px solid rgba(15,27,56,.08);
+background:
+linear-gradient(170deg,rgba(0,56,159,.12),transparent 54%),
+linear-gradient(10deg,rgba(227,27,52,.14),transparent 60%);
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+}
+
+.logo-frame{
+position:relative;
+border:1px solid rgba(255,255,255,.55);
+border-radius:22px;
+padding:18px 16px;
+background:rgba(255,255,255,.72);
+box-shadow:0 12px 32px rgba(6,26,75,.12);
+}
+
+.logo-frame::after{
+content:"";
+position:absolute;
+inset:auto 14px 12px 14px;
+height:32px;
+background:radial-gradient(ellipse,rgba(0,56,159,.2),rgba(0,56,159,0));
 }
 
 .logo{
-width:220px;
-margin-bottom:20px;
+position:relative;
+z-index:1;
+width:100%;
+max-width:360px;
+display:block;
+margin:0 auto;
+filter:drop-shadow(0 10px 22px rgba(6,26,75,.16));
+}
+
+.hero-art{
+margin-top:20px;
+border-radius:20px;
+padding:18px;
+background:rgba(255,255,255,.8);
+color:var(--ink);
+box-shadow:0 18px 34px rgba(7,25,77,.2);
+}
+
+.hero-tag{
+font-size:.75rem;
+font-weight:700;
+letter-spacing:.12em;
+text-transform:uppercase;
+opacity:.7;
+}
+
+.hero-title{
+margin:8px 0 8px;
+font-family:"Rubik Mono One",sans-serif;
+font-size:clamp(1.18rem,1.15vw + .9rem,1.7rem);
+line-height:1.17;
+}
+
+.hero-text{
+margin:0;
+font-size:.95rem;
+line-height:1.5;
+opacity:.85;
+}
+
+.note{
+margin-top:20px;
+font-size:.88rem;
+font-weight:700;
+letter-spacing:.04em;
+color:#274680;
+text-transform:uppercase;
+}
+
+.content{
+padding:34px 30px;
+display:flex;
+}
+
+.screen{
+display:none;
+width:100%;
+margin:auto;
+text-align:left;
+animation:entry .42s cubic-bezier(.19,.93,.27,1);
+}
+
+.screen.is-active{display:block}
+
+@keyframes entry{
+from{opacity:0;transform:translateY(15px) scale(.986)}
+to{opacity:1;transform:translateY(0) scale(1)}
 }
 
 h1{
-margin-bottom:10px;
-color:#17479e;
+margin:0;
+font-family:"Rubik Mono One",sans-serif;
+font-size:clamp(1.12rem,1vw + .95rem,1.5rem);
+line-height:1.22;
+color:#09193f;
 }
 
 p{
-color:#555;
+margin:12px 0 0;
+font-size:1rem;
+line-height:1.6;
+color:#546482;
+max-width:470px;
 }
 
-.btn{
-display:block;
-width:100%;
-margin:10px 0;
-padding:14px;
-border:none;
-border-radius:10px;
-font-size:16px;
-cursor:pointer;
-background:#17479e;
-color:white;
-text-decoration:none;
+.actions,
+.form-stack{
+display:grid;
+gap:12px;
+margin-top:24px;
 }
 
-.btn:hover{
-background:#0f3477;
-}
-
-.btn-red{
-background:#e3222a;
-}
-
-.btn-red:hover{
-background:#b91c21;
-}
-
-textarea,input{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:8px;
-border:1px solid #ddd;
-font-size:15px;
-}
-
+.cta,
+.input,
 textarea{
-min-height:120px;
-resize:vertical;
+width:100%;
+font-family:"Manrope",sans-serif;
 }
 
-.hidden{
-display:none;
+.cta{
+appearance:none;
+border:none;
+border-radius:14px;
+padding:14px 16px;
+font-size:1rem;
+font-weight:800;
+line-height:1.2;
+cursor:pointer;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+text-decoration:none;
+transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;
 }
 
-.success{
-color:green;
-margin-top:10px;
+.cta:hover{transform:translateY(-1px);filter:saturate(1.04)}
+.cta:active{transform:translateY(0)}
+
+.cta-blue{
+color:#fff;
+background:linear-gradient(105deg,var(--blue),#155ad4);
+box-shadow:0 12px 24px rgba(0,56,159,.27);
 }
 
-.error{
-color:red;
-margin-top:10px;
+.cta-red{
+color:#fff;
+background:linear-gradient(105deg,var(--red),var(--red-deep));
+box-shadow:0 12px 24px rgba(227,27,52,.24);
 }
 
+.cta-ghost{
+color:var(--blue-deep);
+background:rgba(0,56,159,.08);
+box-shadow:inset 0 0 0 1px rgba(0,56,159,.2);
+}
+
+.input,
+textarea{
+border:1px solid rgba(15,27,56,.14);
+border-radius:12px;
+padding:12px 13px;
+font-size:15px;
+font-weight:600;
+line-height:1.4;
+background:rgba(255,255,255,.95);
+color:var(--ink);
+transition:border-color .15s ease,box-shadow .15s ease;
+}
+
+.input::placeholder,
+textarea::placeholder{color:#8a95ac;font-weight:500}
+
+.input:focus,
+textarea:focus{
+outline:none;
+border-color:rgba(0,56,159,.65);
+box-shadow:0 0 0 3px rgba(0,56,159,.14);
+}
+
+textarea{min-height:130px;resize:vertical}
+
+.status{
+margin-top:8px;
+min-height:24px;
+font-size:.95rem;
+font-weight:700;
+}
+
+.status.error{color:#bc1a31}
+.status.success{color:#117447}
+
+@media (max-width:900px){
+body{padding:12px}
+
+.layout{
+grid-template-columns:1fr;
+min-height:unset;
+}
+
+.hero{
+border-right:none;
+border-bottom:1px solid rgba(15,27,56,.08);
+padding:22px 16px 18px;
+}
+
+.hero-art{margin-top:12px}
+
+.content{padding:20px 16px 22px}
+
+.shell{border-radius:22px}
+
+.note{margin-top:14px}
+}
 </style>
 </head>
-
 <body>
+<div class="canvas" aria-hidden="true">
+<div class="grid"></div>
+<div class="ribbon top"></div>
+<div class="ribbon bottom"></div>
+<div class="orb blue"></div>
+<div class="orb red"></div>
+</div>
 
-<div class="container" id="step1">
+<main class="stage">
+<div class="shell">
+<div class="layout">
+<aside class="hero">
+<div class="logo-frame">
+<img src="logo.jpg" class="logo" alt="РемЗОНА сервисный центр">
+</div>
+</aside>
 
-<img src="logo.jpg" class="logo">
-
+<section class="content">
+<div class="screen is-active" id="step1">
 <h1>Вам понравился ремонт?</h1>
-
 <p>Нам важна ваша обратная связь</p>
-
-<button class="btn" onclick="showGood()">Да, всё понравилось</button>
-
-<button class="btn btn-red" onclick="showBad()">Есть замечания</button>
-
+<div class="actions">
+<button class="cta cta-blue" onclick="showGood()">Да, все понравилось</button>
+<button class="cta cta-red" onclick="showBad()">Нужна консультация</button>
+</div>
 </div>
 
-
-
-<div class="container hidden" id="good">
-
-<img src="logo.jpg" class="logo">
-
+<div class="screen" id="good">
 <h1>Спасибо за оценку</h1>
-
 <p>Будем благодарны за отзыв</p>
-
-<a class="btn"
-href="https://yandex.ru/maps/org/remzona/181772428362/reviews/"
-target="_blank"
-onclick="track('Яндекс')">
-Оставить отзыв в Яндекс Картах
-</a>
-
-<a class="btn"
-href="https://2gis.ru/taganrog/firm/70000001022500563/tab/reviews"
-target="_blank"
-onclick="track('2ГИС')">
-Оставить отзыв в 2ГИС
-</a>
-
-<a class="btn"
-href="https://www.google.com/maps/search/?api=1&query=RemZona%20Таганрог"
-target="_blank"
-onclick="track('Google')">
-Открыть Google Maps
-</a>
-
-<button class="btn btn-red" onclick="goStart()">Назад</button>
-
+<div class="actions">
+<a class="cta cta-blue" href="https://yandex.ru/maps/org/remzona/181772428362/reviews/" target="_blank" rel="noopener" onclick="track('Яндекс')">Оставить отзыв в Яндекс Картах</a>
+<a class="cta cta-blue" href="https://2gis.ru/taganrog/firm/70000001022500563/tab/reviews" target="_blank" rel="noopener" onclick="track('2ГИС')">Оставить отзыв в 2ГИС</a>
+<a class="cta cta-blue" href="https://www.google.com/maps/search/?api=1&query=RemZona%20Таганрог" target="_blank" rel="noopener" onclick="track('Google')">Открыть Google Maps</a>
+<button class="cta cta-ghost" onclick="goStart()">Назад</button>
+</div>
 </div>
 
-
-
-<div class="container hidden" id="bad">
-
-<img src="logo.jpg" class="logo">
-
+<div class="screen" id="bad">
 <h1>Расскажите, что исправить</h1>
-
 <p>Мы внимательно рассмотрим обращение</p>
-
-<form id="feedbackForm">
-
-<input name="name" placeholder="Ваше имя">
-
-<input name="phone" placeholder="Телефон">
-
+<form id="feedbackForm" class="form-stack">
+<input class="input" name="name" placeholder="Ваше имя">
+<input class="input" id="phoneInput" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Телефон">
 <textarea name="message" placeholder="Что нам исправить?" required></textarea>
-
-<!-- honeypot -->
 <input name="company" style="display:none">
-
-<button type="submit" class="btn btn-red">
-Отправить
-</button>
-
+<button type="submit" class="cta cta-red">Отправить сообщение</button>
 </form>
-
-<div id="status"></div>
-
-<button class="btn" onclick="goStart()">Назад</button>
-
+<div id="status" class="status"></div>
+<div class="actions">
+<button class="cta cta-ghost" onclick="goStart()">Назад</button>
+</div>
 </div>
 
-
-
-<div class="container hidden" id="success">
-
-<img src="logo.jpg" class="logo">
-
+<div class="screen" id="success">
 <h1>Спасибо!</h1>
-
 <p>Ваше сообщение отправлено</p>
-
-<button class="btn" onclick="goStart()">На главную</button>
-
+<div class="actions">
+<button class="cta cta-blue" onclick="goStart()">На главную</button>
 </div>
-
-
+</div>
+</section>
+</div>
+</div>
+</main>
 
 <script>
-
-const step1=document.getElementById("step1")
-const good=document.getElementById("good")
-const bad=document.getElementById("bad")
-const success=document.getElementById("success")
+const step1 = document.getElementById("step1")
+const good = document.getElementById("good")
+const bad = document.getElementById("bad")
+const success = document.getElementById("success")
 
 function hideAll(){
-step1.classList.add("hidden")
-good.classList.add("hidden")
-bad.classList.add("hidden")
-success.classList.add("hidden")
+step1.classList.remove("is-active")
+good.classList.remove("is-active")
+bad.classList.remove("is-active")
+success.classList.remove("is-active")
 }
 
 function goStart(){
 hideAll()
-step1.classList.remove("hidden")
+step1.classList.add("is-active")
 }
 
 function showGood(){
 hideAll()
-good.classList.remove("hidden")
+good.classList.add("is-active")
 }
 
 function showBad(){
 hideAll()
-bad.classList.remove("hidden")
+bad.classList.add("is-active")
 }
 
 async function track(platform){
-
 try{
-
 await fetch("/track",{
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-platform:platform
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({ platform:platform })
 })
-})
-
 }catch(e){
 console.log(e)
 }
-
 }
 
-const form=document.getElementById("feedbackForm")
-const status=document.getElementById("status")
+const form = document.getElementById("feedbackForm")
+const status = document.getElementById("status")
+const phoneInput = document.getElementById("phoneInput")
 
-form.addEventListener("submit",async function(e){
+phoneInput.addEventListener("input", function(){
+this.value = this.value.replace(/[^0-9+()\\-\\s]/g, "")
+})
 
+form.addEventListener("submit", async function(e){
 e.preventDefault()
+status.textContent = ""
+status.className = "status"
 
-const data=new FormData(form)
+const data = new FormData(form)
 
-const payload={
+const payload = {
 name:data.get("name"),
-phone:data.get("phone"),
+phone:(data.get("phone") || "").toString().trim(),
 message:data.get("message"),
 company:data.get("company")
 }
 
+if(payload.phone){
+const phoneAllowed = /^[0-9+()\\-\\s]{7,20}$/.test(payload.phone)
+const digitsOnly = payload.phone.replace(/\\D/g, "")
+if(!phoneAllowed || digitsOnly.length < 10){
+status.textContent = "Введите корректный телефон"
+status.classList.add("error")
+return
+}
+}
+
 try{
-
-const res=await fetch("/feedback",{
-
+const res = await fetch("/feedback",{
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
+headers:{"Content-Type":"application/json"},
 body:JSON.stringify(payload)
-
 })
 
-const json=await res.json()
+const json = await res.json()
 
 if(json.ok){
-
+form.reset()
 hideAll()
-success.classList.remove("hidden")
-
+success.classList.add("is-active")
 }else{
-
-status.innerHTML='<div class="error">Не удалось отправить сообщение</div>'
-
+status.textContent = "Не удалось отправить сообщение"
+status.classList.add("error")
 }
-
 }catch(e){
-
-status.innerHTML='<div class="error">Ошибка соединения</div>'
-
+status.textContent = "Ошибка соединения"
+status.classList.add("error")
 }
-
 })
-
 </script>
-
 </body>
 </html>
