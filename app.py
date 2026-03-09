@@ -6,8 +6,8 @@ from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
-BOT_TOKEN = "8512904617:AAEG2wyXs5bMGAQ-bJ9t1fa-ZLoPwGzS6ow"
-CHAT_ID = "7493805659"
+BOT_TOKEN = ""
+CHAT_ID = ""
 
 MAX_MESSAGE_LENGTH = 1500
 
@@ -117,4 +117,5 @@ def track():
 
 
 if __name__ == "__main__":
+
     app.run(host="0.0.0.0", port=5000, debug=True)
