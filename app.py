@@ -2,14 +2,18 @@ from datetime import datetime
 from urllib.parse import quote_plus
 import time
 import re
+import os
 
 import requests
 from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
-BOT_TOKEN = "8512904617:AAEG2wyXs5bMGAQ-bJ9t1fa-ZLoPwGzS6ow"
-CHAT_ID = "7493805659"
+BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
+CHAT_ID = os.getenv("CHAT_ID", "").strip()
+
+if not BOT_TOKEN or not CHAT_ID:
+    raise RuntimeError("Set BOT_TOKEN and CHAT_ID environment variables")
 
 MAX_MESSAGE_LENGTH = 1500
 
@@ -122,13 +126,14 @@ def feedback():
     if "http://" in message or "https://" in message:
         return jsonify({"ok": False})
 
-    # проверка телефона
-    if phone:
-        if not re.fullmatch(r"[0-9+()\-\s]{7,20}", phone):
-            return jsonify({"ok": False})
-        digits_only = re.sub(r"\D", "", phone)
-        if len(digits_only) < 10:
-            return jsonify({"ok": False})
+    # телефон обязателен: минимум 10 цифр
+    if not phone:
+        return jsonify({"ok": False})
+    if not re.fullmatch(r"[0-9+()\-\s]{10,25}", phone):
+        return jsonify({"ok": False})
+    digits_only = re.sub(r"\D", "", phone)
+    if len(digits_only) < 10:
+        return jsonify({"ok": False})
 
     # защита от спама одинаковыми сообщениями
     if message == last_message:
@@ -147,7 +152,7 @@ def feedback():
         "🛠 Новая обратная связь\n\n"
         f"🕒 {now}\n"
         f"👤 {name or 'Не указано'}\n"
-        f"📞 {phone or 'Не указан'}\n\n"
+        f"📞 {phone}\n\n"
         f"{message}"
     )
 
