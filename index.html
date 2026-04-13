@@ -139,14 +139,6 @@ box-shadow:0 24px 70px rgba(7,25,77,.22),0 2px 10px rgba(7,25,77,.08);
 overflow:hidden;
 }
 
-.shell::before{
-content:"";
-position:absolute;
-inset:0;
-pointer-events:none;
-background:none;
-}
-
 .layout{
 position:relative;
 z-index:1;
@@ -176,14 +168,6 @@ background:rgba(255,255,255,.72);
 box-shadow:0 12px 32px rgba(6,26,75,.12);
 }
 
-.logo-frame::after{
-content:"";
-position:absolute;
-inset:auto 14px 12px 14px;
-height:32px;
-background:radial-gradient(ellipse,rgba(0,56,159,.2),rgba(0,56,159,0));
-}
-
 .logo{
 position:relative;
 z-index:1;
@@ -192,46 +176,6 @@ max-width:360px;
 display:block;
 margin:0 auto;
 filter:drop-shadow(0 10px 22px rgba(6,26,75,.16));
-}
-
-.hero-art{
-margin-top:20px;
-border-radius:20px;
-padding:18px;
-background:rgba(255,255,255,.8);
-color:var(--ink);
-box-shadow:0 18px 34px rgba(7,25,77,.2);
-}
-
-.hero-tag{
-font-size:.75rem;
-font-weight:700;
-letter-spacing:.12em;
-text-transform:uppercase;
-opacity:.7;
-}
-
-.hero-title{
-margin:8px 0 8px;
-font-family:"Rubik Mono One",sans-serif;
-font-size:clamp(1.18rem,1.15vw + .9rem,1.7rem);
-line-height:1.17;
-}
-
-.hero-text{
-margin:0;
-font-size:.95rem;
-line-height:1.5;
-opacity:.85;
-}
-
-.note{
-margin-top:20px;
-font-size:.88rem;
-font-weight:700;
-letter-spacing:.04em;
-color:#274680;
-text-transform:uppercase;
 }
 
 .content{
@@ -334,16 +278,6 @@ color:var(--ink);
 transition:border-color .15s ease,box-shadow .15s ease;
 }
 
-.input::placeholder,
-textarea::placeholder{color:#8a95ac;font-weight:500}
-
-.input:focus,
-textarea:focus{
-outline:none;
-border-color:rgba(0,56,159,.65);
-box-shadow:0 0 0 3px rgba(0,56,159,.14);
-}
-
 textarea{min-height:130px;resize:vertical}
 
 .status{
@@ -358,25 +292,10 @@ font-weight:700;
 
 @media (max-width:900px){
 body{padding:12px}
-
-.layout{
-grid-template-columns:1fr;
-min-height:unset;
-}
-
-.hero{
-border-right:none;
-border-bottom:1px solid rgba(15,27,56,.08);
-padding:22px 16px 18px;
-}
-
-.hero-art{margin-top:12px}
-
+.layout{grid-template-columns:1fr;min-height:unset;}
+.hero{border-right:none;border-bottom:1px solid rgba(15,27,56,.08);padding:22px 16px 18px;}
 .content{padding:20px 16px 22px}
-
 .shell{border-radius:22px}
-
-.note{margin-top:14px}
 }
 </style>
 </head>
@@ -414,7 +333,7 @@ padding:22px 16px 18px;
 <div class="actions">
 <a class="cta cta-blue" href="https://yandex.ru/maps/org/remzona/181772428362/reviews/" target="_blank" rel="noopener" onclick="track('Яндекс')">Оставить отзыв в Яндекс Картах</a>
 <a class="cta cta-blue" href="https://2gis.ru/taganrog/firm/70000001022500563/tab/reviews" target="_blank" rel="noopener" onclick="track('2ГИС')">Оставить отзыв в 2ГИС</a>
-<a class="cta cta-blue" href="https://www.google.com/maps/search/?api=1&query=RemZona%20Таганрог" target="_blank" rel="noopener" onclick="track('Google')">Открыть Google Maps</a>
+<a class="cta cta-blue" href="https://www.google.com/maps" target="_blank" rel="noopener" onclick="track('Google')">Открыть Google Maps</a>
 <button class="cta cta-ghost" onclick="goStart()">Назад</button>
 </div>
 </div>
@@ -424,7 +343,7 @@ padding:22px 16px 18px;
 <p>Мы внимательно рассмотрим обращение</p>
 <form id="feedbackForm" class="form-stack">
 <input class="input" name="name" placeholder="Ваше имя">
-<input class="input" id="phoneInput" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Телефон">
+<input class="input" id="phoneInput" name="phone" type="tel" placeholder="Телефон">
 <textarea name="message" placeholder="Что нам исправить?" required></textarea>
 <input name="company" style="display:none">
 <button type="submit" class="cta cta-red">Отправить сообщение</button>
@@ -448,43 +367,30 @@ padding:22px 16px 18px;
 </main>
 
 <script>
+// Ссылка на твой бэкенд на Hugging Face
+const BACKEND_URL = "https://attacjer-remzona-feedback.hf.space";
+
 const step1 = document.getElementById("step1")
 const good = document.getElementById("good")
 const bad = document.getElementById("bad")
 const success = document.getElementById("success")
 
 function hideAll(){
-step1.classList.remove("is-active")
-good.classList.remove("is-active")
-bad.classList.remove("is-active")
-success.classList.remove("is-active")
+    [step1, good, bad, success].forEach(s => s.classList.remove("is-active"));
 }
 
-function goStart(){
-hideAll()
-step1.classList.add("is-active")
-}
-
-function showGood(){
-hideAll()
-good.classList.add("is-active")
-}
-
-function showBad(){
-hideAll()
-bad.classList.add("is-active")
-}
+function goStart(){ hideAll(); step1.classList.add("is-active"); }
+function showGood(){ hideAll(); good.classList.add("is-active"); }
+function showBad(){ hideAll(); bad.classList.add("is-active"); }
 
 async function track(platform){
-try{
-await fetch("/track",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({ platform:platform })
-})
-}catch(e){
-console.log(e)
-}
+    try{
+        await fetch(`${BACKEND_URL}/track`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ platform: platform })
+        });
+    } catch(e){ console.log("Track error:", e); }
 }
 
 const form = document.getElementById("feedbackForm")
@@ -492,55 +398,52 @@ const status = document.getElementById("status")
 const phoneInput = document.getElementById("phoneInput")
 
 phoneInput.addEventListener("input", function(){
-this.value = this.value.replace(/[^0-9+()\\-\\s]/g, "")
+    this.value = this.value.replace(/[^0-9+()\-\s]/g, "");
 })
 
 form.addEventListener("submit", async function(e){
-e.preventDefault()
-status.textContent = ""
-status.className = "status"
+    e.preventDefault();
+    status.textContent = "Отправка...";
+    status.className = "status";
 
-const data = new FormData(form)
+    const data = new FormData(form);
+    const payload = {
+        name: data.get("name"),
+        phone: (data.get("phone") || "").toString().trim(),
+        message: data.get("message"),
+        company: data.get("company")
+    };
 
-const payload = {
-name:data.get("name"),
-phone:(data.get("phone") || "").toString().trim(),
-message:data.get("message"),
-company:data.get("company")
-}
+    // Валидация телефона
+    const digitsOnly = payload.phone.replace(/\D/g, "");
+    if(digitsOnly.length < 10){
+        status.textContent = "Введите корректный телефон";
+        status.classList.add("error");
+        return;
+    }
 
-if(payload.phone){
-const phoneAllowed = /^[0-9+()\\-\\s]{7,20}$/.test(payload.phone)
-const digitsOnly = payload.phone.replace(/\\D/g, "")
-if(!phoneAllowed || digitsOnly.length < 10){
-status.textContent = "Введите корректный телефон"
-status.classList.add("error")
-return
-}
-}
+    try{
+        const res = await fetch(`${BACKEND_URL}/feedback`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        });
 
-try{
-const res = await fetch("/feedback",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(payload)
-})
+        const json = await res.json();
 
-const json = await res.json()
-
-if(json.ok){
-form.reset()
-hideAll()
-success.classList.add("is-active")
-}else{
-status.textContent = "Не удалось отправить сообщение"
-status.classList.add("error")
-}
-}catch(e){
-status.textContent = "Ошибка соединения"
-status.classList.add("error")
-}
-})
+        if(json.ok){
+            form.reset();
+            hideAll();
+            success.classList.add("is-active");
+        } else {
+            status.textContent = "Не удалось отправить сообщение";
+            status.classList.add("error");
+        }
+    } catch(e){
+        status.textContent = "Ошибка соединения с сервером";
+        status.classList.add("error");
+    }
+});
 </script>
 </body>
 </html>
